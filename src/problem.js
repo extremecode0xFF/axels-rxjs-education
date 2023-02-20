@@ -1,3 +1,8 @@
+import { interval } from 'rxjs';
+import {
+  filter, map, scan, take,
+} from 'rxjs/operators';
+
 const btn = document.getElementById('interval');
 const rxjsBtn = document.getElementById('rxjs');
 const display = document.querySelector('#problem .result');
@@ -17,7 +22,7 @@ btn.addEventListener('click', () => {
   let index = 0;
   const list = [];
 
-  const interval = setInterval(() => {
+  const ninterval = setInterval(() => {
     if (people[index]) {
       if (people[index].age >= 18) {
         list.push(people[index].name);
@@ -25,8 +30,23 @@ btn.addEventListener('click', () => {
       display.textContent = list.join(', ');
       index += 1;
     } else {
-      clearInterval(interval);
+      clearInterval(ninterval);
       btn.disabled = false;
     }
   }, 1000);
+});
+
+rxjsBtn.addEventListener('click', () => {
+  rxjsBtn.disabled = true;
+
+  interval(1000)
+    .pipe(
+      take(people.length),
+      filter((index) => people[index].age >= 18),
+      map((index) => people[index].name),
+      scan((acc, value) => acc.concat(value), []),
+    )
+    .subscribe((res) => { display.textContent = res.join(', '); }, null, () => {
+      rxjsBtn.disabled = false;
+    });
 });
